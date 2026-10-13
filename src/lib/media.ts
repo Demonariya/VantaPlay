@@ -18,7 +18,7 @@ function probeUrl(
       URL.revokeObjectURL(url);
       resolve(v);
     };
-    const el = document.createElement(kind === "audio" ? "audio" : "video");
+    const el = document.createElement(kind === "audio" ? "audio" : "video") as HTMLVideoElement;
     el.preload = "metadata";
     el.muted = true;
     const timer = window.setTimeout(() => finish({ duration: 0, width: 0, height: 0 }), timeoutMs);

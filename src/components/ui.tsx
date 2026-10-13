@@ -6,6 +6,7 @@ import {
   useRef,
   type ButtonHTMLAttributes,
   type ReactNode,
+  type Ref,
 } from "react";
 import { ChevronDown, Minus, Plus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -17,13 +18,15 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   label: string;
   active?: boolean;
   size?: "sm" | "md" | "lg";
+  ref?: Ref<HTMLButtonElement>;
 }
-export function IconButton({ icon: Icon, label, active, size = "md", className, ...rest }: IconButtonProps) {
+export function IconButton({ icon: Icon, label, active, size = "md", className, ref, ...rest }: IconButtonProps) {
   const dims = { sm: "h-8 w-8", md: "h-10 w-10", lg: "h-12 w-12" }[size];
   const iconDims = { sm: 16, md: 20, lg: 24 }[size];
   return (
     <button
       type="button"
+      ref={ref}
       aria-label={label}
       title={label}
       className={cn(

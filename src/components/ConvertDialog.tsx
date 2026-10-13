@@ -7,13 +7,10 @@ import { useUIStore } from "../stores/useUIStore";
 import { useLibraryStore } from "../stores/useLibraryStore";
 import { usePlayerStore } from "../stores/usePlayerStore";
 import { getBlob } from "../lib/db";
-import {
-  loadTranscoder,
-  terminateTranscoder,
-  transcode,
-  type TranscodeFormat,
-  type TranscodeQuality,
-  type TranscodeResolution,
+import type {
+  TranscodeFormat,
+  TranscodeQuality,
+  TranscodeResolution,
 } from "../lib/transcode";
 import { cn } from "../lib/cn";
 
@@ -45,14 +42,18 @@ export function ConvertDialog() {
   const isStream = !!item.isStream;
 
   async function start() {
+    const current = item;
+    if (!current) return;
     cancelRef.current = false;
     setError(null);
     setResult(null);
     setProgress(0);
     setPhase("loading");
     try {
-      const bytes = await getBlob(item.id);
+      const bytes = await getBlob(current.id);
       if (!bytes) throw new Error("The file bytes for this item are not available.");
+      // The ffmpeg engine (and its ~30 MB wasm) loads only when Convert runs.
+      const { loadTranscoder, transcode } = await import("../lib/transcode");
       await loadTranscoder();
       if (cancelRef.current) {
         setPhase("idle");
@@ -61,7 +62,7 @@ export function ConvertDialog() {
       setPhase("working");
       const res = await transcode(
         bytes,
-        item.name,
+        current.name,
         { format, quality, resolution },
         (p) => setProgress(p.ratio),
         () => cancelRef.current
@@ -84,7 +85,8 @@ export function ConvertDialog() {
 
   function cancel() {
     cancelRef.current = true;
-    terminateTranscoder();
+    // Drop the engine without pulling it into the main bundle.
+    void import("../lib/transcode").then((m) => m.terminateTranscoder());
     setPhase("idle");
   }
 

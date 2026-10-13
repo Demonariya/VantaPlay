@@ -70,7 +70,7 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
       const el = usePlayerStore.getState().videoEl;
       // Placeholder hook: real loudness normalization needs WebAudio.
       // We keep the toggle honest by applying it when the graph exists.
-      if (el) el.preservePitch = true;
+      if (el) el.preservesPitch = true;
     }
   },
 

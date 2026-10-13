@@ -169,6 +169,8 @@ function PalettePanel() {
     return list;
   }, [query, items, playlists, streams, setPaletteOpen, openModal, setView, toggleSidebar]);
 
+  const active = rows.length > 0 ? Math.min(activeIndex, rows.length - 1) : 0;
+
   useEffect(() => {
     listRef.current
       ?.querySelector<HTMLElement>("[data-active='true']")
@@ -179,8 +181,6 @@ function PalettePanel() {
     setQuery(value);
     setActiveIndex(0);
   };
-
-  const active = rows.length > 0 ? Math.min(activeIndex, rows.length - 1) : 0;
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowDown") {

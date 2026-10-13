@@ -14,8 +14,8 @@ import { ContextMenu } from "./components/ContextMenu";
 import { SettingsModal } from "./components/settings/SettingsModal";
 import { PropertiesModal } from "./components/PropertiesModal";
 import { AddStreamModal } from "./components/AddStreamModal";
-import { NewPlaylistModal } from "./components/NewPlaylistModal";
-import { RenamePlaylistModal } from "./components/RenamePlaylistModal";
+import { ConvertDialog } from "./components/ConvertDialog";
+import { NewPlaylistModal, RenamePlaylistModal } from "./components/PlaylistModals";
 import { HomeView } from "./views/HomeView";
 import { LibraryView } from "./views/LibraryView";
 import { PlaylistsView } from "./views/PlaylistsView";
@@ -73,6 +73,7 @@ export default function App() {
       <SettingsModal />
       <PropertiesModal />
       <AddStreamModal />
+      <ConvertDialog />
       <NewPlaylistModal />
       <RenamePlaylistModal />
     </div>

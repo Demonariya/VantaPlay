@@ -109,7 +109,10 @@ export async function transcode(
     const data = (await ff.readFile(outFile)) as Uint8Array;
     const mime =
       opts.format === "mp4" ? "video/mp4" : opts.format === "webm" ? "video/webm" : "audio/mpeg";
-    return { blob: new Blob([data], { type: mime }), fileName: `${base}.${opts.format}` };
+    // Copy into a fresh ArrayBuffer: wasm memory views are ArrayBufferLike,
+    // which BlobPart does not accept.
+    const bytes = Uint8Array.from(data);
+    return { blob: new Blob([bytes.buffer], { type: mime }), fileName: `${base}.${opts.format}` };
   } finally {
     ff.off("progress", onProg);
     await ff.deleteFile(inFile).catch(() => undefined);

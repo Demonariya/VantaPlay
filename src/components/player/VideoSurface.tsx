@@ -3,7 +3,6 @@
    position, throttled progress persistence, sidecar subtitle <track>
    elements, and the audio-only art backdrop. */
 import { useEffect, useRef } from "react";
-import Hls from "hls.js";
 import { Music } from "lucide-react";
 import { useLibraryStore } from "../../stores/useLibraryStore";
 import { usePlayerStore } from "../../stores/usePlayerStore";
@@ -89,22 +88,34 @@ export function VideoSurface() {
     };
   }, []);
 
-  /* Source (re)configuration per item: HLS for .m3u8, plain src otherwise. */
+  /* Source (re)configuration per item: HLS for .m3u8, plain src otherwise.
+     hls.js lazy-loads so the main bundle stays lean for local files. */
   useEffect(() => {
     const video = videoRef.current;
     const it = itemRef.current;
     if (!video || !it) return;
-    let hls: Hls | null = null;
-    if (it.src.toLowerCase().endsWith(".m3u8") && Hls.isSupported()) {
-      hls = new Hls();
-      hls.loadSource(it.src);
-      hls.attachMedia(video);
+    let cancelled = false;
+    let hls: { destroy: () => void } | null = null;
+    if (it.src.toLowerCase().endsWith(".m3u8")) {
+      void import("hls.js").then((m) => {
+        if (cancelled) return;
+        const Hls = m.default;
+        if (Hls.isSupported()) {
+          const inst = new Hls();
+          hls = inst;
+          inst.loadSource(it.src);
+          inst.attachMedia(video);
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = it.src; // Safari native HLS
+        }
+      });
     } else {
       video.src = it.src;
     }
     video.playbackRate = usePlayerStore.getState().rate;
     void video.play().catch(() => undefined);
     return () => {
+      cancelled = true;
       hls?.destroy();
       video.removeAttribute("src");
       video.load();
