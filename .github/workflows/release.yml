@@ -8,6 +8,10 @@ on:
     tags:
       - "v*"
 
+# tauri-action needs to create the GitHub release and upload artifacts.
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
