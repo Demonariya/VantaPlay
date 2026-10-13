@@ -1,14 +1,17 @@
 {
   "name": "vlc-redesign",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "tauri": "tauri",
+    "shots": "node scripts/shots.mjs",
+    "icons": "python3 scripts/make-icons.py"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
@@ -35,8 +38,23 @@
     "@vitejs/plugin-react": "^6.1.1",
     "jsdom": "^30.1.2",
     "oxlint": "^1.81.0",
+    "playwright": "^1.64.0",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
     "vitest": "^5.0.4"
-  }
+  },
+  "description": "VLC Media Player, redesigned. A modern dark-first media player for local files and network streams.",
+  "license": "MIT",
+  "author": "Rishabh Bohra",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sudo-Mystic/vlc-redesign.git"
+  },
+  "keywords": [
+    "vlc",
+    "media-player",
+    "redesign",
+    "tauri",
+    "react"
+  ]
 }

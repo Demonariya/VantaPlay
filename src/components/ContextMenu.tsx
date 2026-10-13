@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronRight,
   Copy,
+  FolderOpen,
   Info,
   ListMusic,
   ListPlus,
@@ -80,6 +81,7 @@ function MenuPanel({ menu }: { menu: ContextMenuState }) {
 
   const [confirming, setConfirming] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [locationNote, setLocationNote] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -102,7 +104,7 @@ function MenuPanel({ menu }: { menu: ContextMenuState }) {
     };
   }, [closeContextMenu]);
 
-  const itemCount = menu.kind === "media" ? 5 : 3;
+  const itemCount = menu.kind === "media" ? 6 : 3;
   const x = Math.min(menu.x, window.innerWidth - 232);
   const y = Math.max(
     8,
@@ -253,6 +255,21 @@ function MenuPanel({ menu }: { menu: ContextMenuState }) {
                 label="Convert / Stream"
                 onClick={() => openModal({ type: "convert", targetId: menu.id })}
               />
+              {!targetItem.isStream && (
+                <>
+                  <MenuRow
+                    icon={FolderOpen}
+                    label="Open File Location"
+                    onClick={() => setLocationNote((v) => !v)}
+                  />
+                  {locationNote && (
+                    <p className="px-3 pb-1.5 pt-0.5 text-xs leading-relaxed text-text-subtle">
+                      Imported files live inside the app library, so there is no
+                      folder to open in the web version.
+                    </p>
+                  )}
+                </>
+              )}
               <MenuRow
                 icon={Info}
                 label="Properties"

@@ -213,8 +213,7 @@ export function ModalShell({ title, onClose, children, wide }: ModalShellProps) 
   const titleId = useId();
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+    const onKey = (e: KeyboardEvent) => {      if (e.key === "Escape") onClose();
       if (e.key === "Tab" && panelRef.current) {
         // Minimal focus trap.
         const focusables = panelRef.current.querySelectorAll<HTMLElement>(
@@ -234,7 +233,12 @@ export function ModalShell({ title, onClose, children, wide }: ModalShellProps) 
     };
     document.addEventListener("keydown", onKey);
     const prev = document.activeElement as HTMLElement | null;
-    panelRef.current?.focus();
+    // Focus a field the dialog marked for autofocus (it mounts before this
+    // parent effect runs, so React's autoFocus already lost to panel.focus()).
+    // Otherwise focus the panel itself so screen readers announce the dialog.
+    const panel = panelRef.current;
+    const target = panel?.querySelector<HTMLElement>("[data-autofocus]") ?? panel;
+    target?.focus({ preventScroll: true });
     return () => {
       document.removeEventListener("keydown", onKey);
       prev?.focus?.();
@@ -257,6 +261,7 @@ export function ModalShell({ title, onClose, children, wide }: ModalShellProps) 
         className={cn(
           "anim-pop-in max-h-[85vh] w-full overflow-hidden rounded-container",
           "border border-border-subtle bg-bg-surface-1 shadow-pop outline-none",
+          "focus:outline-none",
           wide ? "max-w-3xl" : "max-w-lg"
         )}
       >

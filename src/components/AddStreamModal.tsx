@@ -52,6 +52,7 @@ export function AddStreamModal() {
             id="stream-url"
             type="url"
             autoFocus
+            data-autofocus
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://example.com/stream.m3u8"

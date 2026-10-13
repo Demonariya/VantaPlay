@@ -6,15 +6,12 @@ import { ModalShell } from "./ui";
 const inputClass =
   "w-full rounded-control border border-border-subtle bg-bg-surface-2 px-3 py-2 text-sm text-text-main placeholder:text-text-subtle transition-colors duration-200 ease-out focus:border-accent-primary focus:outline-none";
 
-function useOpen(type: "newPlaylist" | "renamePlaylist"): boolean {
-  const modal = useUIStore((s) => s.modal);
-  return modal?.type === type;
-}
-
 export function NewPlaylistModal() {
-  const open = useOpen("newPlaylist");
+  const modal = useUIStore((s) => s.modal);
+  const open = modal?.type === "newPlaylist";
   const closeModal = useUIStore((s) => s.closeModal);
   const createPlaylist = useLibraryStore((s) => s.createPlaylist);
+  const addToPlaylist = useLibraryStore((s) => s.addToPlaylist);
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -34,7 +31,11 @@ export function NewPlaylistModal() {
       return;
     }
     try {
-      await createPlaylist(name);
+      const playlist = await createPlaylist(name);
+      // When opened from "Add to Playlist" on a media item, add it straight away.
+      if (modal?.targetId) {
+        await addToPlaylist(playlist.id, modal.targetId);
+      }
       closeModal();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create the playlist.");
@@ -52,6 +53,7 @@ export function NewPlaylistModal() {
             id="playlist-name"
             type="text"
             autoFocus
+            data-autofocus
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Road trip mixes"
@@ -131,6 +133,7 @@ export function RenamePlaylistModal() {
             id="rename-playlist-name"
             type="text"
             autoFocus
+            data-autofocus
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={80}
