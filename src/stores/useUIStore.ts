@@ -37,6 +37,11 @@ interface UIState {
   modal: ModalState | null;
   openModal: (m: ModalState) => void;
   closeModal: () => void;
+
+  /** True while a playbar popover (volume / tracks / speed) is open.
+      Lets Esc unwind the popover first instead of closing the player. */
+  popoverOpen: boolean;
+  setPopoverOpen: (open: boolean) => void;
 }
 
 function readBool(key: string, fallback: boolean): boolean {
@@ -96,4 +101,7 @@ export const useUIStore = create<UIState>()((set) => ({
   modal: null,
   openModal: (modal) => set({ modal, contextMenu: null, paletteOpen: false }),
   closeModal: () => set({ modal: null }),
+
+  popoverOpen: false,
+  setPopoverOpen: (popoverOpen) => set({ popoverOpen }),
 }));

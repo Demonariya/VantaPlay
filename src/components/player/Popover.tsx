@@ -9,6 +9,7 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
+import { useUIStore } from "../../stores/useUIStore";
 
 interface PopoverProps {
   open: boolean;
@@ -42,6 +43,14 @@ export function Popover({ open, onClose, anchorRef, children, align = "left" }: 
   }, [open, anchorRef, align]);
 
   // Dismiss on outside mousedown (capture phase) and Escape.
+  useEffect(() => {
+    if (!open) return;
+    // Announce to the global Esc handler so it unwinds the popover first
+    // instead of closing the whole player.
+    useUIStore.getState().setPopoverOpen(true);
+    return () => useUIStore.getState().setPopoverOpen(false);
+  }, [open ]);
+
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {

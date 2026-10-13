@@ -46,6 +46,8 @@ export function useKeyboardShortcuts(): void {
           return;
         }
         if (player.playerOpen) {
+          // Playbar popovers handle their own Escape; unwind them first.
+          if (ui.popoverOpen) return;
           player.closePlayer();
         }
         return;

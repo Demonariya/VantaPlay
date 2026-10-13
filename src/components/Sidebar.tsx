@@ -7,6 +7,7 @@ import {
   Home,
   ListMusic,
   Radio,
+  Settings,
 } from "lucide-react";
 import { usePlayerStore } from "../stores/usePlayerStore";
 import { useUIStore } from "../stores/useUIStore";
@@ -26,6 +27,8 @@ export function Sidebar() {
   const setView = useUIStore((s) => s.setView);
   const collapsed = useUIStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
+  const openModal = useUIStore((s) => s.openModal);
+  const settingsOpen = useUIStore((s) => s.modal?.type === "settings");
   const closePlayer = usePlayerStore((s) => s.closePlayer);
 
   return (
@@ -86,6 +89,33 @@ export function Sidebar() {
       </nav>
 
       <div className="shrink-0 border-t border-border-subtle p-3">
+        <button
+          type="button"
+          onClick={() => openModal({ type: "settings" })}
+          aria-label="Settings"
+          title={collapsed ? "Settings" : undefined}
+          className={cn(
+            "relative mb-1 flex h-10 w-full items-center gap-3 rounded-control px-3",
+            "text-sm font-medium transition-all duration-200 ease-out",
+            collapsed && "justify-center px-0",
+            settingsOpen
+              ? "bg-accent-soft text-text-main"
+              : "text-text-muted hover:bg-bg-surface-2 hover:text-text-main"
+          )}
+        >
+          {settingsOpen && (
+            <span
+              aria-hidden="true"
+              className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-accent-primary"
+            />
+          )}
+          <Settings
+            size={20}
+            aria-hidden="true"
+            className={cn("shrink-0", settingsOpen && "text-accent-primary")}
+          />
+          {!collapsed && <span className="truncate">Settings</span>}
+        </button>
         <button
           type="button"
           onClick={toggleSidebar}

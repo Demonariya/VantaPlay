@@ -8,6 +8,7 @@ import { IconButton } from "../components/ui";
 import { useLibraryStore } from "../stores/useLibraryStore";
 import { usePlayerStore } from "../stores/usePlayerStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
+import { useUIStore } from "../stores/useUIStore";
 import { formatTime } from "../lib/format";
 import { cn } from "../lib/cn";
 import { VideoSurface } from "../components/player/VideoSurface";
@@ -113,7 +114,7 @@ export function PlayerView() {
           break;
         case "Escape":
           // Popovers handle their own Escape; only leave the player when none is open.
-          if (document.querySelector('[role="menu"]')) return;
+          if (useUIStore.getState().popoverOpen) return;
           closePlayer();
           break;
       }
