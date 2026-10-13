@@ -1,0 +1,188 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   VLC Redesign — Global Design System tokens
+   Dark-first. Every color, radius and motion value in the app comes
+   from here. Components must use these tokens, never hardcoded hex.
+------------------------------------------------------------------- */
+@theme {
+  /* Surfaces */
+  --color-bg-primary: #121214;      /* app base: deep obsidian */
+  --color-bg-surface-1: #1a1a1e;    /* elevated panel 1 */
+  --color-bg-surface-2: #24242a;    /* elevated panel 2 */
+  --color-bg-overlay: rgba(18, 18, 20, 0.72);
+
+  /* Borders */
+  --color-border-subtle: #2a2a30;   /* 1px inner borders */
+  --color-border-strong: #3a3a42;
+
+  /* Accent — iconic VLC amber, modernized */
+  --color-accent-primary: #ff7a00;
+  --color-accent-hover: #ff8c1a;
+  --color-accent-pressed: #e66e00;
+  --color-accent-soft: rgba(255, 122, 0, 0.14);
+  --color-accent-faint: rgba(255, 122, 0, 0.08);
+
+  /* Text hierarchy */
+  --color-text-main: #ffffff;
+  --color-text-muted: #9ba1a6;
+  --color-text-subtle: #5e6368;
+
+  /* Semantic */
+  --color-danger: #ff453a;
+  --color-success: #30d158;
+
+  /* Typography */
+  --font-sans: "Inter", "SF Pro Display", "Geist Sans", system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+
+  /* Radius */
+  --radius-container: 16px;
+  --radius-card: 12px;
+  --radius-control: 10px;
+  --radius-pill: 999px;
+
+  /* Motion — 200ms ease-out micro-interactions per spec */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+
+  /* Shadows */
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 16px 48px rgba(0, 0, 0, 0.6);
+  --shadow-glow-accent: 0 0 24px rgba(255, 122, 0, 0.35);
+}
+
+/* ------------------------------ base ------------------------------ */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-bg-primary);
+  color: var(--color-text-main);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden; /* app shell manages its own scroll regions */
+}
+
+::selection {
+  background: var(--color-accent-soft);
+}
+
+/* Slim dark scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Accessible focus: accent ring, never removed without replacement */
+:focus-visible {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* --------------------------- keyframes ---------------------------- */
+@keyframes vlc-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes vlc-pop-in {
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes vlc-slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes vlc-shimmer {
+  from { background-position: -400px 0; }
+  to { background-position: 400px 0; }
+}
+
+.anim-fade-in { animation: vlc-fade-in var(--duration-base) var(--ease-out-soft); }
+.anim-pop-in { animation: vlc-pop-in var(--duration-base) var(--ease-out-soft); }
+.anim-slide-up { animation: vlc-slide-up var(--duration-slow) var(--ease-out-soft); }
+
+/* Skeleton shimmer for thumbnail loading states */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-surface-1) 25%,
+    var(--color-bg-surface-2) 50%,
+    var(--color-bg-surface-1) 75%
+  );
+  background-size: 800px 100%;
+  animation: vlc-shimmer 1.4s linear infinite;
+}
+
+/* Glassmorphism for the floating playbar / overlays */
+.glass {
+  background: var(--color-bg-overlay);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid var(--color-border-subtle);
+}
+
+/* Hide native video controls everywhere; we render our own */
+video::-webkit-media-controls {
+  display: none !important;
+}
+
+/* Custom range inputs (volume, sliders) */
+.vlc-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-bg-surface-2);
+  border: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+}
+.vlc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-text-main);
+  border: none;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+  transition: transform var(--duration-fast) var(--ease-out-soft);
+}
+.vlc-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: var(--color-accent-primary);
+}
+.vlc-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-text-main);
+  border: none;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+.vlc-slider::-moz-range-thumb:hover {
+  background: var(--color-accent-primary);
+}
+.vlc-slider::-moz-range-progress {
+  background: var(--color-accent-primary);
+  height: 6px;
+  border-radius: 999px;
+}
