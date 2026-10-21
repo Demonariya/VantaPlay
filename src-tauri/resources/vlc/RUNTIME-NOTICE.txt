@@ -1,0 +1,3 @@
+VantaPlay Windows build copies the VideoLAN VLC runtime into this directory at build time.
+Keep accompanying COPYING, README, AUTHORS and other license notices with the redistributed runtime.
+Review license terms for the exact VLC version and plugins: https://www.videolan.org/legal.html

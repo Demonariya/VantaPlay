@@ -31,7 +31,7 @@
       "icons/icon.ico"
     ],
     "targets": ["nsis", "msi"],
-    "resources": ["resources/vlc/**"]
+    "resources": ["resources/vlc/"]
   },
   "identifier": "com.demonariya.vantaplay",
   "productName": "VantaPlay",

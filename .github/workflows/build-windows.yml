@@ -41,6 +41,11 @@ jobs:
           Copy-Item (Join-Path $vlcDir "plugins") $destination -Recurse -Force
           Get-ChildItem $vlcDir -File | Where-Object { $_.Name -match '^(COPYING|README|AUTHORS|NEWS)' } | Copy-Item -Destination $destination -Force
           Set-Content -Path (Join-Path $destination "RUNTIME-NOTICE.txt") -Value "VantaPlay bundles the VideoLAN VLC runtime. See https://www.videolan.org/legal.html for license information."
+          if (-not (Test-Path (Join-Path $destination "libvlc.dll"))) {
+            throw "libvlc.dll was not copied to the VantaPlay resources folder."
+          }
+          Write-Host "Runtime files staged:"
+          Get-ChildItem $destination -Force | Select-Object Name, Length, Mode | Format-Table -AutoSize
 
       - name: Install frontend dependencies
         run: npm ci
