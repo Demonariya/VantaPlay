@@ -8,9 +8,10 @@ export interface MediaItem {
   /** Display name (file name or stream title) */
   name: string;
   kind: MediaKind;
-  /** Ephemeral object URL for playback. Rebuilt from the stored blob
-      (local files) or streamUrl (network) on every app boot. */
+  /** Runtime playback URL or native filesystem path. */
   src: string;
+  /** Canonical local path used by libVLC in the Windows desktop build. */
+  nativePath?: string;
   /** Original network URL for streams */
   streamUrl?: string;
   isStream?: boolean;

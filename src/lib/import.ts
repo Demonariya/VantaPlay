@@ -2,12 +2,19 @@
 
 import { useRef, useState, type DragEvent } from "react";
 import { useLibraryStore } from "../stores/useLibraryStore";
+import { invokeNative, isTauriRuntime } from "./nativeBridge";
 
 const ACCEPT =
   "video/*,audio/*,.mkv,.avi,.flac,.ogg,.opus,.m4a,.mp3,.mp4,.webm,.mov";
 
 /** Open the native file picker and import the chosen media files. */
 export function pickMediaFiles(): void {
+  if (isTauriRuntime()) {
+    void invokeNative<string[]>("pick_media_files")
+      .then((paths) => useLibraryStore.getState().importNativePaths(paths))
+      .catch((error: unknown) => console.error("VantaPlay file picker failed:", error));
+    return;
+  }
   const input = document.createElement("input");
   input.type = "file";
   input.multiple = true;

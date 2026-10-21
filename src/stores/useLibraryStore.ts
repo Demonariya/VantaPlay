@@ -27,6 +27,7 @@ interface LibraryState {
 
   load: () => Promise<void>;
   importFiles: (files: File[] | FileList) => Promise<{ added: number; skipped: number }>;
+  importNativePaths: (paths: string[]) => Promise<{ added: number; skipped: number }>;
   addStreamUrl: (url: string, name?: string) => Promise<StreamEntry>;
   removeStream: (id: string) => Promise<void>;
   removeItem: (id: string) => Promise<void>;
@@ -61,7 +62,9 @@ export const useLibraryStore = create<LibraryState>()((set, get) => ({
     const items: MediaItem[] = [];
     for (const m of media) {
       let src = "";
-      if (m.isStream && m.streamUrl) {
+      if (m.nativePath) {
+        src = m.nativePath;
+      } else if (m.isStream && m.streamUrl) {
         src = m.streamUrl;
       } else {
         const blob = await getBlob(m.id);
@@ -111,6 +114,25 @@ export const useLibraryStore = create<LibraryState>()((set, get) => ({
       } catch {
         // One bad file must not abort the batch.
       }
+    }
+    return { added, skipped };
+  },
+
+  importNativePaths: async (paths) => {
+    let added = 0;
+    let skipped = 0;
+    const knownPaths = new Set(get().items.map((item) => item.nativePath).filter(Boolean));
+    for (const nativePath of paths) {
+      const name = nativePath.split(/[\\/]/).filter(Boolean).pop() ?? nativePath;
+      if (!isSupportedMediaFile(name) || knownPaths.has(nativePath)) { skipped += 1; continue; }
+      knownPaths.add(nativePath);
+      const stored: StoredMediaItem = {
+        id: uid(), name, kind: kindFromName(name), nativePath, isStream: false,
+        duration: 0, addedAt: Date.now(), playCount: 0, ext: extFromName(name),
+      };
+      await putMedia(stored);
+      set((s) => ({ items: [...s.items, toRuntimeItem(stored, nativePath)] }));
+      added += 1;
     }
     return { added, skipped };
   },

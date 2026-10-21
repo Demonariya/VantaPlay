@@ -25,6 +25,23 @@ jobs:
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Install VLC runtime for native playback
+        shell: pwsh
+        run: |
+          choco install vlc -y --no-progress
+          $vlcDir = Join-Path $env:ProgramFiles "VideoLAN\VLC"
+          if (-not (Test-Path (Join-Path $vlcDir "libvlc.dll"))) {
+            $libvlc = Get-ChildItem -Path $env:ProgramFiles -Filter "libvlc.dll" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+            if (-not $libvlc) { throw "libvlc.dll was not found after installing VLC." }
+            $vlcDir = $libvlc.Directory.FullName
+          }
+          $destination = "src-tauri/resources/vlc"
+          New-Item -ItemType Directory -Path $destination -Force | Out-Null
+          Copy-Item (Join-Path $vlcDir "*.dll") $destination -Force
+          Copy-Item (Join-Path $vlcDir "plugins") $destination -Recurse -Force
+          Get-ChildItem $vlcDir -File | Where-Object { $_.Name -match '^(COPYING|README|AUTHORS|NEWS)' } | Copy-Item -Destination $destination -Force
+          Set-Content -Path (Join-Path $destination "RUNTIME-NOTICE.txt") -Value "VantaPlay bundles the VideoLAN VLC runtime. See https://www.videolan.org/legal.html for license information."
+
       - name: Install frontend dependencies
         run: npm ci
 
@@ -45,6 +62,7 @@ jobs:
             throw "Expected Tauri executable was not found: $source"
           }
           Copy-Item $source "src-tauri/target/release/VantaPlay.exe" -Force
+          Copy-Item "src-tauri/resources/vlc" "src-tauri/target/release/vlc" -Recurse -Force
 
       - name: Upload Windows outputs
         uses: actions/upload-artifact@v4
@@ -52,6 +70,7 @@ jobs:
           name: VantaPlay-Windows-x64
           path: |
             src-tauri/target/release/VantaPlay.exe
+            src-tauri/target/release/vlc/**
             src-tauri/target/release/bundle/nsis/*.exe
             src-tauri/target/release/bundle/msi/*.msi
           if-no-files-found: error
