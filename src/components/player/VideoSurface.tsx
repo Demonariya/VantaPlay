@@ -90,7 +90,7 @@ export function VideoSurface() {
       video.removeEventListener("ended", onEnded);
       ps.setVideoEl(null);
     };
-  }, []);
+  }, [nativeMode]);
 
   /* Source (re)configuration per item: HLS for .m3u8, plain src otherwise.
      hls.js lazy-loads so the main bundle stays lean for local files. */
@@ -128,7 +128,8 @@ export function VideoSurface() {
 
 
   useEffect(() => {
-    if (!nativeMode || !item) {
+    const mediaId = currentId;
+    if (!nativeMode || !item || !mediaId) {
       usePlayerStore.getState().setNativeActive(false);
       if (isTauriRuntime()) {
         void invokeNative("vlc_stop").catch(() => undefined);
@@ -154,15 +155,15 @@ export function VideoSurface() {
         usePlayerStore.getState().syncNativeStatus(status);
         if (!markedStarted && (status.state === "playing" || status.state === "buffering")) {
           markedStarted = true;
-          void useLibraryStore.getState().markStarted(currentId);
+          void useLibraryStore.getState().markStarted(mediaId);
         }
-        const it = useLibraryStore.getState().items.find((entry) => entry.id === currentId);
+        const it = useLibraryStore.getState().items.find((entry) => entry.id === mediaId);
         if (it && status.durationMs > 0 && it.duration === 0) {
-          void useLibraryStore.getState().updateItem(currentId, { duration: status.durationMs / 1000 });
+          void useLibraryStore.getState().updateItem(mediaId, { duration: status.durationMs / 1000 });
         }
         if (status.currentTimeMs > 0 && performance.now() - lastTouch > 15000) {
           lastTouch = performance.now();
-          void useLibraryStore.getState().touchPlayed(currentId, status.currentTimeMs / 1000);
+          void useLibraryStore.getState().touchPlayed(mediaId, status.currentTimeMs / 1000);
         }
         if (status.state === "ended" && !handledEnded) { handledEnded = true; usePlayerStore.getState().syncEnded(); }
       } catch (error) {
