@@ -4,8 +4,6 @@ use std::{ffi::{c_char, c_int, c_void, CString}, path::PathBuf, ptr, sync::Mutex
 use libloading::Library;
 use serde::Serialize;
 use tauri::{AppHandle, Manager, State, Window};
-#[cfg(windows)]
-use tauri::platform::windows::WindowExtWindows;
 
 #[derive(Clone, Copy, Default, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -256,25 +254,39 @@ fn vlc_open(source: String, start_time_ms: Option<i64>, app: AppHandle, window: 
         let csource = CString::new(source).map_err(|_| "The media path contains an invalid null character.".to_string())?;
         let instance = engine.instance;
         let video_hwnd = engine.video_hwnd as *mut c_void;
-        let api = engine.api.as_ref().expect("VLC API loaded");
-        let is_url = ["http://", "https://", "rtsp://", "rtmp://", "udp://", "ftp://"].iter().any(|prefix| source.starts_with(prefix));
-        let media = unsafe {
-            if is_url { (api.media_new_location)(instance, csource.as_ptr()) }
-            else { (api.media_new_path)(instance, csource.as_ptr()) }
+        let (media, player) = {
+            let api = engine.api.as_ref().expect("VLC API loaded");
+            let is_url = ["http://", "https://", "rtsp://", "rtmp://", "udp://", "ftp://"]
+                .iter()
+                .any(|prefix| source.starts_with(prefix));
+            let media = unsafe {
+                if is_url { (api.media_new_location)(instance, csource.as_ptr()) }
+                else { (api.media_new_path)(instance, csource.as_ptr()) }
+            };
+            if media.is_null() { return Err("libVLC could not open this media source.".into()); }
+            let player = unsafe { (api.player_new)(instance) };
+            if player.is_null() {
+                unsafe { (api.media_release)(media); }
+                return Err("libVLC could not create a media player.".into());
+            }
+            unsafe {
+                (api.player_set_media)(player, media);
+                (api.player_set_hwnd)(player, video_hwnd);
+            }
+            if unsafe { (api.player_play)(player) } < 0 {
+                unsafe {
+                    (api.player_release)(player);
+                    (api.media_release)(media);
+                }
+                return Err("libVLC rejected the media source.".into());
+            }
+            if let Some(time_ms) = start_time_ms.filter(|value| *value > 0) {
+                unsafe { (api.player_set_time)(player, time_ms); }
+            }
+            (media, player)
         };
-        if media.is_null() { return Err("libVLC could not open this media source.".into()); }
-        let player = unsafe { (api.player_new)(instance) };
-        if player.is_null() { unsafe { (api.media_release)(media) }; return Err("libVLC could not create a media player.".into()); }
-        unsafe { (api.player_set_media)(player, media); (api.player_set_hwnd)(player, video_hwnd); }
         engine.media = media;
         engine.player = player;
-        if unsafe { (api.player_play)(player) } < 0 {
-            engine.stop_current();
-            return Err("libVLC rejected the media source.".into());
-        }
-        if let Some(time_ms) = start_time_ms.filter(|value| *value > 0) {
-            unsafe { (api.player_set_time)(player, time_ms); }
-        }
         Ok(())
     }
 }
