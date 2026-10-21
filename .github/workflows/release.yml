@@ -1,6 +1,4 @@
-# Builds signed desktop installers for Windows, macOS and Linux whenever a
-# version tag (v*) is pushed, and attaches them to a draft GitHub release.
-# Usage: git tag v0.1.0 && git push origin v0.1.0
+# Tag a version to publish unsigned desktop bundles as a draft GitHub release.
 name: Release
 
 on:
@@ -8,7 +6,6 @@ on:
     tags:
       - "v*"
 
-# tauri-action needs to create the GitHub release and upload artifacts.
 permissions:
   contents: write
 
@@ -38,7 +35,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - uses: dtolnay/rust-toolchain@stable
@@ -50,8 +47,8 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: "VLC Redesigned ${{ github.ref_name }}"
-          releaseBody: "Desktop release of VLC Redesigned. See the README for the feature tour."
+          releaseName: "VantaPlay ${{ github.ref_name }}"
+          releaseBody: "VantaPlay desktop build. Review README.md for the current implementation status."
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}

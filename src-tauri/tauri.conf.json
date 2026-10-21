@@ -9,7 +9,7 @@
         "height": 800,
         "minHeight": 600,
         "minWidth": 960,
-        "title": "VLC Redesigned",
+        "title": "VantaPlay",
         "width": 1280
       }
     ]
@@ -30,9 +30,9 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "targets": "all"
+    "targets": ["nsis", "msi"]
   },
-  "identifier": "com.sudomystic.vlc-redesign",
-  "productName": "VLC Redesigned",
+  "identifier": "com.demonariya.vantaplay",
+  "productName": "VantaPlay",
   "version": "0.1.0"
 }
